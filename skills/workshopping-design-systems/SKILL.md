@@ -11,7 +11,7 @@ Not for applying a finished brand (read that system's skill instead), and not fo
 
 ## Canvas
 
-Default: `./website/` in this folder.
+The lab lives at `./website/` in the **project root** — not inside the skill folder.
 
 | File | Role |
 |------|------|
@@ -21,7 +21,30 @@ Default: `./website/` in this folder.
 
 The lab chrome uses the same tokens, so every change is visible immediately.
 
-If the canvas is missing or still a create-next-app starter, restore this layout before workshopping.
+## Setup
+
+Run before the first workshop pass if the canvas is missing or not yet a lab.
+
+**Needs setup when any of these are true:**
+
+- `./website/` does not exist
+- `./website/app/tokens.css` is missing
+- `./website/app/page.js` still shows the create-next-app starter (Next.js logo, “edit page.js”)
+
+**Template source:** `website/` inside this skill's directory. Resolve it from wherever the skill is installed — e.g. `skills/workshopping-design-systems/website/` in CreatorCreator, or `~/.cursor/skills/workshopping-design-systems/website/` when linked.
+
+**Copy into the project:**
+
+```bash
+# from project root; set TEMPLATE to the skill's website/ folder
+rsync -a --exclude node_modules --exclude .next --exclude reference \
+  "$TEMPLATE/" ./website/
+cd website && npm install && npm run dev
+```
+
+Do not work inside the skill's bundled `website/` — always copy to the project's `./website/`. If `./website/` already has a valid lab, skip the copy; only run `npm install` / `npm run dev` if dependencies or the dev server are missing.
+
+Open [http://localhost:3000](http://localhost:3000) and confirm Overview plus `/colour`, `/type`, `/space`, `/shape` load before workshopping.
 
 ## Workflow
 
