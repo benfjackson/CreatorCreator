@@ -9,6 +9,8 @@ Decide visual rules on a live canvas, then write them as tokens. Stop when found
 
 Not for applying a finished brand (read that system's skill instead), and not for building product pages before tokens exist.
 
+**First action in every session:** run [Setup](#setup). Do not brief, tokenise, or run `create-next-app` until the lab is verified.
+
 ## Canvas
 
 The lab lives at `./website/` in the **project root** — not inside the skill folder.
@@ -23,31 +25,41 @@ The lab chrome uses the same tokens, so every change is visible immediately.
 
 ## Setup
 
-Run before the first workshop pass if the canvas is missing or not yet a lab.
-
-**Needs setup when any of these are true:**
-
-- `./website/` does not exist
-- `./website/app/tokens.css` is missing
-- `./website/app/page.js` still shows the create-next-app starter (Next.js logo, “edit page.js”)
-
-**Template source:** `website/` inside this skill's directory. Resolve it from wherever the skill is installed — e.g. `skills/workshopping-design-systems/website/` in CreatorCreator, or `~/.cursor/skills/workshopping-design-systems/website/` when linked.
-
-**Copy into the project:**
+**Run this before anything else.** From the **project root** (where you want `./website/`):
 
 ```bash
-# from project root; set TEMPLATE to the skill's website/ folder
-rsync -a --exclude node_modules --exclude .next --exclude reference \
-  "$TEMPLATE/" ./website/
+bash ~/.cursor/skills/workshopping-design-systems/scripts/setup-lab.sh
 cd website && npm install && npm run dev
 ```
 
-Do not work inside the skill's bundled `website/` — always copy to the project's `./website/`. If `./website/` already has a valid lab, skip the copy; only run `npm install` / `npm run dev` if dependencies or the dev server are missing.
+If the skill is not under `~/.cursor/skills/`, find this skill's folder on disk and run `scripts/setup-lab.sh` from there. The script copies its bundled `website/` template — do not set paths by hand.
+
+**Lab is ready when all are true:**
+
+- `./website/.design-lab` exists
+- `./website/app/tokens.css` exists
+- `./website/app/components/LabShell.js` exists
+- Home shows “Design lab” nav (Overview, Colour, Type, Space, Shape) — not the create-next-app starter
+
+**Needs setup when any of these are true:**
+
+- `./website/.design-lab` is missing
+- `./website/app/tokens.css` is missing
+- `./website/app/page.js` imports `next/image` with the Next.js logo, or says “edit page.js”
+
+**Never:**
+
+- Run `create-next-app` or `npx create-next-app` for this workflow
+- Workshop inside the skill's bundled `website/` (read-only template)
+- Edit the starter page in place — copy the template first
+
+If `./website/` already has a valid lab, skip the script; only run `npm install` / `npm run dev` if needed.
 
 Open [http://localhost:3000](http://localhost:3000) and confirm Overview plus `/colour`, `/type`, `/space`, `/shape` load before workshopping.
 
 ## Workflow
 
+0. **Setup.** Run [Setup](#setup). Confirm the lab marker and nav. Stop if you still see the create-next-app page.
 1. **Brief the product.** Do not invent a brand. Ask in [Briefing](#briefing).
 2. **Read `DECISIONS.md` and `tokens.css`.** Treat locked rules as given.
 3. **One axis per pass.** Colour → type → space → shape → motion. Do not jump to components.
@@ -87,6 +99,8 @@ When adding an axis, add a route and a nav item in `website/app/components/LabSh
 
 | Mistake | Instead |
 |---------|---------|
+| `create-next-app` or editing the starter | Run `setup-lab.sh` first |
+| Working in the skill folder | Copy template to project `./website/` |
 | Inventing a brand personality | Brief first; they pick tone |
 | Hex / px in page CSS | Token in `tokens.css`, `var(--…)` in the page |
 | Designing buttons before type | Foundations in order |
