@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LabToolbar from "./LabToolbar";
 import styles from "../lab.module.css";
 
 const AXES = [
@@ -10,6 +11,7 @@ const AXES = [
   { href: "/type", label: "Type" },
   { href: "/space", label: "Space" },
   { href: "/shape", label: "Shape" },
+  { href: "/components", label: "Components" },
 ];
 
 export default function LabShell({ title, lede, children }) {
@@ -30,6 +32,7 @@ export default function LabShell({ title, lede, children }) {
             </Link>
           ))}
         </nav>
+        <LabToolbar />
       </header>
       <main className={styles.main}>
         <h1 className={styles.title}>{title}</h1>

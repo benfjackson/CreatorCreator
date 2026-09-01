@@ -1,6 +1,6 @@
 ---
 name: workshopping-design-systems
-description: Use when designing or iterating a visual design system in a live canvas — colours, typography, spacing, radii, shadows, motion, or other design rules — before or instead of building product UI.
+description: Use when designing or iterating a visual design system in a live canvas — colours, typography, spacing, radii, component tokens, undo/save — before or instead of building product UI.
 ---
 
 # Workshopping design systems
@@ -17,9 +17,11 @@ The lab lives at `./website/` in the **project root** — not inside the skill f
 
 | File | Role |
 |------|------|
-| `./website/app/tokens.css` | Source of truth for tokens |
+| `./website/app/tokens.css` | Source of truth for tokens (primitives, semantic, component) |
+| `./website/app/lib/tokenRegistry.js` | Lean control definitions — labels, types, defaults, `TOKEN_SYNC` |
+| `./website/app/components/TokenProvider.js` | Live token state, undo/redo, `localStorage`, export |
 | `./website/DECISIONS.md` | Locked rules, open questions, why |
-| `./website/app/{colour,type,space,shape}/` | Specimen pages that only consume tokens |
+| `./website/app/{colour,type,space,shape,components}/` | Specimen pages that only consume tokens |
 
 The lab chrome uses the same tokens, so every change is visible immediately.
 
@@ -39,7 +41,9 @@ If the skill is not under `~/.cursor/skills/`, find this skill's folder on disk 
 - `./website/.design-lab` exists
 - `./website/app/tokens.css` exists
 - `./website/app/components/LabShell.js` exists
-- Home shows “Design lab” nav (Overview, Colour, Type, Space, Shape) — not the create-next-app starter
+- `./website/app/lib/tokenRegistry.js` exists
+- Home shows “Design lab” nav (Overview, Colour, Type, Space, Shape, **Components**) — not the create-next-app starter
+- Header toolbar shows Undo, Copy CSS, Download, Load, Reset
 
 **Needs setup when any of these are true:**
 
@@ -52,19 +56,36 @@ If the skill is not under `~/.cursor/skills/`, find this skill's folder on disk 
 - Run `create-next-app` or `npx create-next-app` for this workflow
 - Workshop inside the skill's bundled `website/` (read-only template)
 - Edit the starter page in place — copy the template first
+- Run `setup-lab.sh` against a project that already has a customised lab — it overwrites `./website/`
 
 If `./website/` already has a valid lab, skip the script; only run `npm install` / `npm run dev` if needed.
 
-Open [http://localhost:3000](http://localhost:3000) and confirm Overview plus `/colour`, `/type`, `/space`, `/shape` load before workshopping.
+Open [http://localhost:3000](http://localhost:3000) and confirm Overview plus `/colour`, `/type`, `/space`, `/shape`, `/components` load before workshopping.
+
+## Interactive lab
+
+The template is **whitelabel** — neutral Geist Sans, slate accent blue, generic specimen copy. After briefing, replace tokens, fonts, logo, and copy in the **project** `./website/`, not in the skill folder.
+
+| Feature | Where |
+|---------|--------|
+| Inline sliders / pickers on each axis | `TokenControl.js` + axis pages |
+| Component workbench (preview + controls) | `/components`, `ComponentWorkbench.js` |
+| Undo / redo (⌘Z / ⌘⇧Z) | `TokenProvider.js` |
+| Auto-save in browser | `localStorage` key `design-lab-tokens` |
+| Copy CSS | Toolbar → clipboard |
+| Download / Load preset | `design-lab-preset.json` |
+| Reset to `tokens.css` defaults | Toolbar |
+
+**Lean controls, not every CSS variable.** `tokenRegistry.js` lists ~11 foundation picks and ~31 component picks. Changing `--accent` also updates `--brand-900` via `TOKEN_SYNC` so primitives stay aligned for export.
 
 ## Workflow
 
-0. **Setup.** Run [Setup](#setup). Confirm the lab marker and nav. Stop if you still see the create-next-app page.
+0. **Setup.** Run [Setup](#setup). Confirm the lab marker, nav, and toolbar. Stop if you still see the create-next-app page.
 1. **Brief the product.** Do not invent a brand. Ask in [Briefing](#briefing).
 2. **Read `DECISIONS.md` and `tokens.css`.** Treat locked rules as given.
-3. **One axis per pass.** Colour → type → space → shape → motion. Do not jump to components.
-4. **Change tokens, not specimens.** Hex, font names, and sizes live in `tokens.css`. Pages only use `var(--…)`.
-5. **Verify in the browser** after each pass. Look at the axis page and at least one other page (the lab chrome is a consumer).
+3. **One axis per pass.** Colour → type → space → shape → **components**. Do not skip foundations for component chrome.
+4. **Change tokens, not specimens.** Hex, font names, and sizes live in `tokens.css` and the registry defaults. Pages and `lab.module.css` only use `var(--…)`.
+5. **Verify in the browser** after each pass. Look at the axis page, `/components` if relevant, and the lab chrome.
 6. **Record the why** in `DECISIONS.md`. Move the item from Open to Locked.
 7. **Stop** when a real screen can be composed from tokens. Hand off; do not pre-build a component library.
 
@@ -80,14 +101,36 @@ Ask in one message. Enough is whatever lets you propose a first pass on colour a
 
 If they have no brand yet, start from the neutral tokens already in `tokens.css` and replace them one axis at a time.
 
+## Whitelabel → product
+
+After setup in a real project, customise in this order:
+
+1. **`DECISIONS.md`** — lock briefing answers.
+2. **`app/layout.js`** — load brand fonts via `next/font`; map variables in `tokens.css`.
+3. **`app/tokens.css`** — primitives and semantic tokens from brand constraints.
+4. **`app/lib/tokenRegistry.js`** — update control `default` values and labels; change `TOKEN_STORAGE_KEY` if you need a project-specific storage namespace.
+5. **Specimen copy** — `app/page.js`, `app/type/page.js`, `app/components/page.js` (wordmark text, tab labels, button labels). Swap `specNavLogoMark` for `public/logo.png` when a logo exists.
+6. **`LabShell.js`** — product name in the header if desired.
+
+Keep specimen pages boring; they show tokens, not marketing copy.
+
 ## Token rules
 
-- **Primitives then semantic.** `--ink-900` is a swatch. `--fg` is what UI uses. Components never pick a primitive.
+- **Primitives then semantic.** `--ink-900` is a swatch. `--fg` is what UI uses. Component tokens (`--btn-bg`, `--nav-height`) sit in `tokens.css`; specimens consume them via `lab.module.css`.
 - **Few tokens.** Add a token when a specimen would otherwise hard-code a value. Do not pre-create hover/disabled/dark variants "for later".
 - **One theme first.** Dark mode is a later pass, not a parallel system.
 - **Fonts via `next/font`.** Load in `layout.js` as CSS variables; map those variables in `tokens.css`. Do not `@import` Google Fonts CSS.
 - **4px space base** unless they lock a different one. Scale by doubling once it feels even; do not add 5px and 6px because a mock was close.
 - **Australian English** in labels and copy (`colour`, `organisation`).
+
+## Adding a component specimen
+
+1. Add component tokens to `tokens.css` (e.g. `--badge-bg`).
+2. Add controls to `COMPONENT_CONTROLS` in `tokenRegistry.js` with `component: "badge"`.
+3. Add specimen styles to `lab.module.css` using only `var(--…)`.
+4. Add a `ComponentWorkbench` block on `app/components/page.js`.
+
+Do not start Tailwind or inline hex on specimen pages.
 
 ## Specimen pages
 
@@ -101,6 +144,7 @@ When adding an axis, add a route and a nav item in `website/app/components/LabSh
 |---------|---------|
 | `create-next-app` or editing the starter | Run `setup-lab.sh` first |
 | Working in the skill folder | Copy template to project `./website/` |
+| Re-running `setup-lab.sh` on a tuned lab | Edit project `./website/` in place |
 | Inventing a brand personality | Brief first; they pick tone |
 | Hex / px in page CSS | Token in `tokens.css`, `var(--…)` in the page |
 | Designing buttons before type | Foundations in order |
@@ -108,3 +152,4 @@ When adding an axis, add a route and a nav item in `website/app/components/LabSh
 | Copying another product's tokens | Start from this canvas, or from files they attached |
 | Dark mode + light mode together | One theme first |
 | Building a component library "so we're ready" | Compose one real screen, then extract |
+| Sidebar token grid for every variable | Lean controls in `tokenRegistry.js` |

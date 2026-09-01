@@ -1,39 +1,51 @@
 import LabShell from "../components/LabShell";
-import ComputedValue from "../components/ComputedValue";
+import { ControlRow } from "../components/TokenControl";
+import { controlsForAxis } from "../lib/tokenRegistry";
 import styles from "../lab.module.css";
 
-const radii = ["--radius-sm", "--radius-md", "--radius-lg", "--radius-full"];
+const controls = controlsForAxis("shape");
 
 export default function ShapePage() {
   return (
     <LabShell
       title="Shape"
-      lede="Radius and shadow only. Motion waits until colour, type, space, and shape can compose a real screen."
+      lede="Corner radius and border thickness — the two shape picks that show up everywhere."
     >
-      <section className={styles.section} style={{ marginTop: "var(--space-8)" }}>
-        <h2 className={styles.sectionTitle}>Radius</h2>
-        <div className={styles.shapeRow}>
-          {radii.map((token) => (
-            <div key={token} style={{ display: "flex", flexDirection: "column", gap: "var(--space-2)" }}>
-              <div className={styles.shapeBox} style={{ borderRadius: `var(${token})` }}>
-                {token.replace("--radius-", "")}
-              </div>
-              <code className={styles.tokenName}>{token}</code>
-              <ComputedValue token={token} />
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Shadow</h2>
-        <div
-          className={`${styles.shapeBox} ${styles.shapeRaised}`}
-          style={{ borderRadius: "var(--radius-md)", width: "12rem", height: "6rem" }}
-        >
-          --shadow-sm
-        </div>
-      </section>
+      <div className={styles.controlList}>
+        {controls.map((control) => (
+          <ControlRow
+            key={control.name}
+            control={control}
+            preview={
+              control.name === "--radius-md" ? (
+                <div
+                  className={styles.previewBlock}
+                  style={{
+                    borderRadius: "var(--radius-md)",
+                    background: "var(--bg-elevated)",
+                    border: "var(--border-width) solid var(--border)",
+                    color: "var(--fg)",
+                  }}
+                >
+                  Card corner
+                </div>
+              ) : (
+                <div
+                  className={styles.previewBlock}
+                  style={{
+                    borderRadius: "var(--radius-md)",
+                    background: "var(--bg-elevated)",
+                    border: "var(--border-width) solid var(--border)",
+                    color: "var(--fg)",
+                  }}
+                >
+                  Border edge
+                </div>
+              )
+            }
+          />
+        ))}
+      </div>
     </LabShell>
   );
 }

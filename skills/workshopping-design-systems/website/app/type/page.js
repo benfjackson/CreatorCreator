@@ -1,57 +1,62 @@
 import LabShell from "../components/LabShell";
-import ComputedValue from "../components/ComputedValue";
+import { ControlRow } from "../components/TokenControl";
+import { controlsForAxis } from "../lib/tokenRegistry";
 import styles from "../lab.module.css";
 
-const samples = [
-  ["--text-display", "--leading-display", "--weight-semibold", "Display", "The quick brown fox"],
-  ["--text-h1", "--leading-heading", "--weight-semibold", "Heading 1", "The quick brown fox"],
-  ["--text-h2", "--leading-heading", "--weight-semibold", "Heading 2", "The quick brown fox"],
-  ["--text-h3", "--leading-heading", "--weight-medium", "Heading 3", "The quick brown fox"],
-  ["--text-body", "--leading-body", "--weight-regular", "Body", "Pack my box with five dozen liquor jugs. Body copy should hold a line of this length without looking tight or sparse."],
-  ["--text-small", "--leading-body", "--weight-regular", "Small", "Meta, labels, compact UI."],
-  ["--text-caption", "--leading-body", "--weight-medium", "Caption", "Token names, overlines, fine print."],
-];
+const controls = controlsForAxis("type");
 
 export default function TypePage() {
   return (
     <LabShell
       title="Type"
-      lede="Families are loaded in layout.js via next/font, then mapped in tokens.css. Change the mapping, not page CSS."
+      lede="Geist Sans is the starter family. Adjust heading size, body size, and line height — swap fonts in layout.js when a brand locks type."
     >
-      <section className={styles.section} style={{ marginTop: "var(--space-8)" }}>
-        <h2 className={styles.sectionTitle}>Families</h2>
-        <div className={styles.stack}>
-          <p style={{ fontFamily: "var(--font-sans)", fontSize: "var(--text-h2)" }}>
-            Sans — Geist (placeholder)
-          </p>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-body)" }}>
-            Mono — Geist Mono (placeholder)
-          </p>
-        </div>
-      </section>
-
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Scale</h2>
-        <div className={styles.stack}>
-          {samples.map(([size, leading, weight, label, sample]) => (
-            <div key={size} className={styles.typeRow}>
-              <div className={styles.typeMeta}>
-                <div>{label}</div>
-                <ComputedValue token={size} />
-              </div>
-              <p
-                style={{
-                  fontSize: `var(${size})`,
-                  lineHeight: `var(${leading})`,
-                  fontWeight: `var(${weight})`,
-                }}
-              >
-                {sample}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <div className={styles.controlList}>
+        {controls.map((control) => (
+          <ControlRow
+            key={control.name}
+            control={control}
+            preview={
+              control.name === "--text-h1" ? (
+                <p
+                  className={styles.previewHeading}
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "var(--text-h1)",
+                    fontWeight: "var(--weight-bold)",
+                    lineHeight: "var(--leading-heading)",
+                    color: "var(--accent)",
+                  }}
+                >
+                  Page heading
+                </p>
+              ) : control.name === "--text-body" ? (
+                <p
+                  className={styles.previewType}
+                  style={{
+                    fontSize: "var(--text-body)",
+                    lineHeight: "var(--leading-body)",
+                    color: "var(--fg)",
+                  }}
+                >
+                  Body copy at the current size and leading — the rhythm you use for paragraphs and UI labels.
+                </p>
+              ) : (
+                <p
+                  className={styles.previewType}
+                  style={{
+                    fontSize: "var(--text-body)",
+                    lineHeight: "var(--leading-body)",
+                    color: "var(--fg)",
+                  }}
+                >
+                  Line one and line two with the same body size — watch vertical rhythm change.
+                </p>
+              )
+            }
+          />
+        ))}
+      </div>
     </LabShell>
   );
 }

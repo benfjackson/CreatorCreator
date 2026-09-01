@@ -1,11 +1,5 @@
-# Design lab
+# Design lab template
 
-Live canvas for workshopping a design system. Tokens live in `app/tokens.css`. Specimen pages consume them. Decisions (the why) live in `DECISIONS.md`.
+Next.js canvas for workshopping design tokens. `setup-lab.sh` copies this folder to `./website/` in your project — edit the **project copy**, not this skill template.
 
-Use the `workshopping-design-systems` skill. One axis at a time: colour → type → space → shape.
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
+After setup, replace neutral starter tokens, specimen copy, and `DECISIONS.md` with product-specific values from your briefing.
